@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
 import Logo from "./components/Logo";
+import DetailedImage from "./DetailedImages";
 
 function App() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -12,6 +13,8 @@ function App() {
   const [panoramaImageSrc, setPanoramaImageSrc] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDetailedImage, setShowDetailedImage] = useState(false);
+  const [detailedImageSrc, setDetailedImageSrc] = useState("");
 
   const handleFileChange = (event) => {
     const files = event.target.files;
@@ -107,8 +110,10 @@ function App() {
       const response = await axios.post(
         "http://localhost:5000/generate-panorama"
       );
+
       const [responseData, status] = response.data;
       const { message, results } = responseData;
+      console.log("Response data from generate:", responseData);
 
       if (status === 200) {
         setMessage(message);
@@ -131,6 +136,17 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to open the DetailedImage component
+  const handleOpenDetailedImage = (src) => {
+    setDetailedImageSrc(src);
+    setShowDetailedImage(true);
+  };
+
+  const handleCloseDetailedImage = () => {
+    setDetailedImageSrc("");
+    setShowDetailedImage(false);
   };
 
   return (
@@ -213,43 +229,76 @@ function App() {
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded shadow-md max-w-lg w-full">
+      <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
         <h3 className="text-xl font-semibold mb-4">{message}</h3>
 
         <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
           <h3 className="text-xl font-semibold mb-4">Stitched Image</h3>
           {stitchedImageSrc && (
-            <img
-              id="mergedImage"
-              src={stitchedImageSrc}
-              alt="Merged Image"
-              className="w-full rounded"
-            />
+            <>
+              <img
+                id="mergedImage"
+                src={stitchedImageSrc}
+                alt="Merged Image"
+                className="w-full rounded"
+              />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
+                onClick={() => handleOpenDetailedImage(stitchedImageSrc)}
+              >
+                Detailed Image
+              </button>
+            </>
           )}
         </div>
+
         <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
           <h3 className="text-xl font-semibold mb-4">Matched points</h3>
           {matchedPointsSrc && (
-            <img
-              id="matchedPoints"
-              src={matchedPointsSrc}
-              alt="Matched Points"
-              className="w-full rounded"
-            />
+            <>
+              <img
+                id="matchedPoints"
+                src={matchedPointsSrc}
+                alt="Matched Points"
+                className="w-full rounded"
+              />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
+                onClick={() => handleOpenDetailedImage(matchedPointsSrc)}
+              >
+                Detailed Image
+              </button>
+            </>
           )}
         </div>
+
         <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
           <h3 className="text-xl font-semibold mb-4">Panorama Image</h3>
           {panoramaImageSrc && (
-            <img
-              id="panoramaImage"
-              src={panoramaImageSrc}
-              alt="Panorama Image"
-              className="w-full rounded"
-            />
+            <>
+              <img
+                id="panoramaImage"
+                src={panoramaImageSrc}
+                alt="Panorama Image"
+                className="w-full rounded"
+              />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
+                onClick={() => handleOpenDetailedImage(panoramaImageSrc)}
+              >
+                Detailed Image
+              </button>
+            </>
           )}
         </div>
       </div>
+
+      {showDetailedImage && (
+        <DetailedImage
+          detailedImageSrc={detailedImageSrc}
+          onClose={handleCloseDetailedImage}
+        />
+      )}
     </div>
   );
 }
