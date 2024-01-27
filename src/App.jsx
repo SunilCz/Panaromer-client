@@ -3,6 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
+import Logo from "./components/Logo";
 
 function App() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -143,7 +144,10 @@ function App() {
       <ToastContainer />
 
       <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
-        <h2 className="text-2xl font-semibold mb-4">Image Stitching App</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center">
+          Panoramer
+          <Logo className="ml-4" />
+        </h2>
 
         <div className="mb-4">
           <label className="block text-gray-700 font-medium mb-2">
