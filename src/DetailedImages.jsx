@@ -16,6 +16,9 @@ const DetailedImage = () => {
           return { path, fileName };
         });
 
+        // Sort the file data array by file name
+        fileData.sort((a, b) => a.fileName.localeCompare(b.fileName));
+
         setImageData(fileData);
       })
       .catch((error) => {

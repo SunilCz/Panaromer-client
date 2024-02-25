@@ -103,7 +103,6 @@ function App() {
       setLoading(false);
     }
   };
-
   const generatePanorama = async () => {
     setLoading(true);
     try {
@@ -119,8 +118,11 @@ function App() {
         setMessage(message);
 
         if (results && results.panoramas && results.panoramas.length > 0) {
+          // Get the last image in the results.panoramas array
+          const lastImage = results.panoramas[results.panoramas.length - 1];
+          const trimmedImageUrl = lastImage.replace("uploads/results/", "");
           setPanoramaImageSrc(
-            "http://localhost:5000/serve-files/panorama_4.jpg"
+            "http://localhost:5000/serve-files/" + trimmedImageUrl
           );
         } else {
           console.error("No panorama images found in results.");
@@ -242,12 +244,6 @@ function App() {
                 alt="Merged Image"
                 className="w-full rounded"
               />
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
-                onClick={() => handleOpenDetailedImage(stitchedImageSrc)}
-              >
-                Detailed Image
-              </button>
             </>
           )}
         </div>
@@ -262,12 +258,6 @@ function App() {
                 alt="Matched Points"
                 className="w-full rounded"
               />
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
-                onClick={() => handleOpenDetailedImage(matchedPointsSrc)}
-              >
-                Detailed Image
-              </button>
             </>
           )}
         </div>
