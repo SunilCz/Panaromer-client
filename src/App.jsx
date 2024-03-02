@@ -5,16 +5,19 @@ import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
 import Logo from "./components/Logo";
 import DetailedImage from "./DetailedImages";
+import ScrollToTopButton from "./components/scroll";
 
 function App() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [stitchedImageSrc, setStitchedImageSrc] = useState("");
   const [matchedPointsSrc, setMatchedPointsSrc] = useState("");
   const [panoramaImageSrc, setPanoramaImageSrc] = useState("");
+  const [refinedPanoramaImageSrc, setRefinedPanoramaImageSrc] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDetailedImage, setShowDetailedImage] = useState(false);
   const [detailedImageSrc, setDetailedImageSrc] = useState("");
+  const [showRefinedImage, setShowRefinedImage] = useState(false);
 
   const handleFileChange = (event) => {
     const files = event.target.files;
@@ -103,6 +106,7 @@ function App() {
       setLoading(false);
     }
   };
+
   const generatePanorama = async () => {
     setLoading(true);
     try {
@@ -149,6 +153,31 @@ function App() {
   const handleCloseDetailedImage = () => {
     setDetailedImageSrc("");
     setShowDetailedImage(false);
+  };
+
+  const handleRefinePanorama = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5000/serve-all-files");
+      const { files } = response.data;
+      const trimmedImages = files.filter((file) =>
+        file.includes("final_panorama_trimmed")
+      );
+      if (trimmedImages.length > 0) {
+        const refinedPanoramaSrc = `http://localhost:5000/serve-files/final_panorama_trimmed.jpg`;
+        setShowRefinedImage(true);
+        setRefinedPanoramaImageSrc(refinedPanoramaSrc);
+
+        toast.success("Panorama refined successfully!");
+      } else {
+        toast.error("No refined panorama image found.");
+      }
+    } catch (error) {
+      console.error("Error refining panorama:", error);
+      toast.error("Error refining panorama. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -272,16 +301,41 @@ function App() {
                 alt="Panorama Image"
                 className="w-full rounded"
               />
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
-                onClick={() => handleOpenDetailedImage(panoramaImageSrc)}
-              >
-                Detailed Image
-              </button>
             </>
           )}
         </div>
+
+        <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
+          <h3 className="text-xl font-semibold mb-4">Refined Image</h3>
+
+          {showRefinedImage && (
+            <>
+              <img
+                id="refinedPanoramaImage"
+                src={refinedPanoramaImageSrc}
+                alt="Refined Panorama Image"
+                className="w-full rounded"
+              />
+            </>
+          )}
+          {panoramaImageSrc && (
+            <button
+              className="bg-yellow-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none"
+              onClick={handleRefinePanorama}
+            >
+              Refine Panorama
+            </button>
+          )}
+        </div>
       </div>
+      {panoramaImageSrc && (
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded h-10 hover:bg-blue-600 focus:outline-none mt-4"
+          onClick={() => handleOpenDetailedImage(panoramaImageSrc)}
+        >
+          Detailed Image
+        </button>
+      )}
 
       {showDetailedImage && (
         <DetailedImage
@@ -289,6 +343,7 @@ function App() {
           onClose={handleCloseDetailedImage}
         />
       )}
+      <ScrollToTopButton />
     </div>
   );
 }
