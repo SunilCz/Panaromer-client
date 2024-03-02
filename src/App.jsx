@@ -6,6 +6,8 @@ import { ClipLoader } from "react-spinners";
 import Logo from "./components/Logo";
 import DetailedImage from "./DetailedImages";
 import ScrollToTopButton from "./components/scroll";
+import DownloadForOfflineSharpIcon from "@mui/icons-material/DownloadForOfflineSharp";
+import { DownCircleTwoTone } from "@ant-design/icons";
 
 function App() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -19,6 +21,28 @@ function App() {
   const [detailedImageSrc, setDetailedImageSrc] = useState("");
   const [showRefinedImage, setShowRefinedImage] = useState(false);
   const fileInputRef = useRef(null);
+
+  const downloadImage = (imageUrl) => {
+    fetch(imageUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+
+        const filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+
+        link.setAttribute("download", filename);
+        link.setAttribute("target", "_blank");
+
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+      })
+      .catch((error) => {
+        console.error("Error downloading image:", error);
+        // Handle errors if needed
+      });
+  };
 
   const handleFileChange = (event) => {
     const files = event.target.files;
@@ -34,7 +58,7 @@ function App() {
   const clearUploads = async () => {
     try {
       const response = await axios.delete(
-        "http://localhost:5000/clear-uploads",
+        "http://localhost:5000/clear-uploads"
       );
 
       if (response.status === 200) {
@@ -44,13 +68,15 @@ function App() {
         setMatchedPointsSrc("");
         setPanoramaImageSrc("");
         setRefinedPanoramaImageSrc("");
+        setMessage("");
+        setShowRefinedImage(false);
 
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
       } else {
         toast.error(
-          response.data.message || "Error clearing uploads. Please try again.",
+          response.data.message || "Error clearing uploads. Please try again."
         );
       }
     } catch (error) {
@@ -78,13 +104,17 @@ function App() {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
       setMessage(response.data.message);
       setStitchedImageSrc("");
       setMatchedPointsSrc("");
       setSelectedFiles([]);
+      setPanoramaImageSrc("");
+      setRefinedPanoramaImageSrc("");
+      setShowRefinedImage(false);
+
       toast.success("Images uploaded successfully!");
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -121,7 +151,7 @@ function App() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/generate-panorama",
+        "http://localhost:5000/generate-panorama"
       );
 
       const [responseData, status] = response.data;
@@ -135,7 +165,7 @@ function App() {
           const lastImage = results.panoramas[results.panoramas.length - 1];
           const trimmedImageUrl = lastImage.replace("uploads/results/", "");
           setPanoramaImageSrc(
-            "http://localhost:5000/serve-files/" + trimmedImageUrl,
+            "http://localhost:5000/serve-files/" + trimmedImageUrl
           );
         } else {
           console.error("No panorama images found in results.");
@@ -169,7 +199,7 @@ function App() {
       const response = await axios.get("http://localhost:5000/serve-all-files");
       const { files } = response.data;
       const trimmedImages = files.filter((file) =>
-        file.includes("final_panorama_trimmed"),
+        file.includes("final_panorama_trimmed")
       );
       if (trimmedImages.length > 0) {
         const refinedPanoramaSrc = `http://localhost:5000/serve-files/final_panorama_trimmed.jpg`;
@@ -300,7 +330,7 @@ function App() {
           )}
         </div>
 
-        <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full">
+        <div className="bg-white p-8 rounded shadow-md mb-4 max-w-lg w-full relative">
           <h3 className="text-xl font-semibold mb-4">Panorama Image</h3>
           {panoramaImageSrc && (
             <>
@@ -310,6 +340,13 @@ function App() {
                 alt="Panorama Image"
                 className="w-full rounded"
               />
+              <button
+                className="bg-blue-500 text-white px-2 py-1 rounded h-8 hover:bg-green-600 focus:outline-none  bottom-4"
+                onClick={() => downloadImage(panoramaImageSrc)}
+              >
+                <DownloadForOfflineSharpIcon />
+                donwload
+              </button>
             </>
           )}
         </div>
@@ -325,22 +362,25 @@ function App() {
                 alt="Refined Panorama Image"
                 className="w-full rounded"
               />
+              {showRefinedImage && (
+                <button
+                  className="bg-blue-500 text-white px-2 py-1 rounded h-8 hover:bg-green-600 focus:outline-none  bottom-4"
+                  onClick={() => downloadImage(refinedPanoramaImageSrc)}
+                >
+                  <DownloadForOfflineSharpIcon />
+                  donwload
+                </button>
+              )}
             </>
           )}
+
           {panoramaImageSrc && (
-            <div>
-              <button
-                className="bg-yellow-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none"
-                onClick={handleRefinePanorama}
-              >
-                Refine Panorama
-              </button>
-              <a href={panoramaImageSrc} target="_blank" download>
-                <button className="bg-green-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none">
-                  Download
-                </button>
-              </a>
-            </div>
+            <button
+              className="bg-yellow-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none"
+              onClick={handleRefinePanorama}
+            >
+              Refine Panorama
+            </button>
           )}
         </div>
       </div>
