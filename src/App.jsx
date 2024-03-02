@@ -81,7 +81,7 @@ function App() {
       }
     } catch (error) {
       console.error("Error clearing uploads:", error);
-      toast.error("Error clearing uploads. Please try again.");
+      // toast.error("Error clearing uploads. Please try again.");
     }
   };
 
@@ -132,8 +132,11 @@ function App() {
         response.data;
 
       if (response.status === 200) {
-        setStitchedImageSrc("http://localhost:5000/" + panorama_image_path);
-        setMatchedPointsSrc("http://localhost:5000/" + matched_points_path);
+        const newStitchedImageUrl = `http://localhost:5000/${panorama_image_path}?t=${Date.now()}`;
+        setStitchedImageSrc(newStitchedImageUrl);
+        const newMatchedPointsUrl = `http://localhost:5000/${matched_points_path}?t=${Date.now()}`;
+        setMatchedPointsSrc(newMatchedPointsUrl);
+
         setMessage(message);
         toast.success("Images stitched successfully!");
       } else {
@@ -147,6 +150,20 @@ function App() {
     }
   };
 
+  const handleOpenDetailedImage = (src) => {
+    const newDetailedImageUrl = `${src}?t=${Date.now()}`;
+    setDetailedImageSrc(newDetailedImageUrl);
+
+    setShowDetailedImage(true);
+  };
+
+  const handleCloseDetailedImage = () => {
+    const newDetailedImageUrl = `${src}?t=${Date.now()}`;
+    setDetailedImageSrc(newDetailedImageUrl);
+
+    setShowDetailedImage(false);
+  };
+
   const generatePanorama = async () => {
     setLoading(true);
     try {
@@ -156,7 +173,6 @@ function App() {
 
       const [responseData, status] = response.data;
       const { message, results } = responseData;
-      console.log("Response data from generate:", responseData);
 
       if (status === 200) {
         setMessage(message);
@@ -164,9 +180,8 @@ function App() {
         if (results && results.panoramas && results.panoramas.length > 0) {
           const lastImage = results.panoramas[results.panoramas.length - 1];
           const trimmedImageUrl = lastImage.replace("uploads/results/", "");
-          setPanoramaImageSrc(
-            "http://localhost:5000/serve-files/" + trimmedImageUrl
-          );
+          const panoramaImageUrl = `http://localhost:5000/serve-files/${trimmedImageUrl}?t=${Date.now()}`;
+          setPanoramaImageSrc(panoramaImageUrl);
         } else {
           console.error("No panorama images found in results.");
         }
@@ -183,16 +198,6 @@ function App() {
     }
   };
 
-  const handleOpenDetailedImage = (src) => {
-    setDetailedImageSrc(src);
-    setShowDetailedImage(true);
-  };
-
-  const handleCloseDetailedImage = () => {
-    setDetailedImageSrc("");
-    setShowDetailedImage(false);
-  };
-
   const handleRefinePanorama = async () => {
     try {
       setLoading(true);
@@ -202,10 +207,9 @@ function App() {
         file.includes("final_panorama_trimmed")
       );
       if (trimmedImages.length > 0) {
-        const refinedPanoramaSrc = `http://localhost:5000/serve-files/final_panorama_trimmed.jpg`;
+        const newRefinedPanoramaImageUrl = `http://localhost:5000/serve-files/final_panorama_trimmed.jpg?t=${Date.now()}`;
+        setRefinedPanoramaImageSrc(newRefinedPanoramaImageUrl);
         setShowRefinedImage(true);
-        setRefinedPanoramaImageSrc(refinedPanoramaSrc);
-
         toast.success("Panorama refined successfully!");
       } else {
         toast.error("No refined panorama image found.");
