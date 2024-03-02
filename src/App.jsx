@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +18,7 @@ function App() {
   const [showDetailedImage, setShowDetailedImage] = useState(false);
   const [detailedImageSrc, setDetailedImageSrc] = useState("");
   const [showRefinedImage, setShowRefinedImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const files = event.target.files;
@@ -38,6 +39,15 @@ function App() {
 
       if (response.status === 200) {
         toast.success(response.data.message);
+        setSelectedFiles([]);
+        setStitchedImageSrc("");
+        setMatchedPointsSrc("");
+        setPanoramaImageSrc("");
+        setRefinedPanoramaImageSrc("");
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       } else {
         toast.error(
           response.data.message || "Error clearing uploads. Please try again."
@@ -122,7 +132,6 @@ function App() {
         setMessage(message);
 
         if (results && results.panoramas && results.panoramas.length > 0) {
-          // Get the last image in the results.panoramas array
           const lastImage = results.panoramas[results.panoramas.length - 1];
           const trimmedImageUrl = lastImage.replace("uploads/results/", "");
           setPanoramaImageSrc(
@@ -144,7 +153,6 @@ function App() {
     }
   };
 
-  // Function to open the DetailedImage component
   const handleOpenDetailedImage = (src) => {
     setDetailedImageSrc(src);
     setShowDetailedImage(true);
@@ -206,6 +214,7 @@ function App() {
             className="w-full p-2 border rounded"
             onChange={handleFileChange}
             multiple
+            ref={fileInputRef}
           />
         </div>
 
