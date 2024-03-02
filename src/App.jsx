@@ -34,7 +34,7 @@ function App() {
   const clearUploads = async () => {
     try {
       const response = await axios.delete(
-        "http://localhost:5000/clear-uploads"
+        "http://localhost:5000/clear-uploads",
       );
 
       if (response.status === 200) {
@@ -50,7 +50,7 @@ function App() {
         }
       } else {
         toast.error(
-          response.data.message || "Error clearing uploads. Please try again."
+          response.data.message || "Error clearing uploads. Please try again.",
         );
       }
     } catch (error) {
@@ -78,7 +78,7 @@ function App() {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       setMessage(response.data.message);
@@ -121,7 +121,7 @@ function App() {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/generate-panorama"
+        "http://localhost:5000/generate-panorama",
       );
 
       const [responseData, status] = response.data;
@@ -135,7 +135,7 @@ function App() {
           const lastImage = results.panoramas[results.panoramas.length - 1];
           const trimmedImageUrl = lastImage.replace("uploads/results/", "");
           setPanoramaImageSrc(
-            "http://localhost:5000/serve-files/" + trimmedImageUrl
+            "http://localhost:5000/serve-files/" + trimmedImageUrl,
           );
         } else {
           console.error("No panorama images found in results.");
@@ -169,7 +169,7 @@ function App() {
       const response = await axios.get("http://localhost:5000/serve-all-files");
       const { files } = response.data;
       const trimmedImages = files.filter((file) =>
-        file.includes("final_panorama_trimmed")
+        file.includes("final_panorama_trimmed"),
       );
       if (trimmedImages.length > 0) {
         const refinedPanoramaSrc = `http://localhost:5000/serve-files/final_panorama_trimmed.jpg`;
@@ -328,12 +328,19 @@ function App() {
             </>
           )}
           {panoramaImageSrc && (
-            <button
-              className="bg-yellow-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none"
-              onClick={handleRefinePanorama}
-            >
-              Refine Panorama
-            </button>
+            <div>
+              <button
+                className="bg-yellow-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none"
+                onClick={handleRefinePanorama}
+              >
+                Refine Panorama
+              </button>
+              <a href={panoramaImageSrc} target="_blank" download>
+                <button className="bg-green-500 text-white px-4 py-2 rounded h-10 hover:bg-yellow-600 focus:outline-none">
+                  Download
+                </button>
+              </a>
+            </div>
           )}
         </div>
       </div>
